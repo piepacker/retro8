@@ -43,6 +43,16 @@ CORE_DIR    += .
 TARGET_NAME := retro8
 LIBM		    = -lm
 
+# language standard
+# in an ideal scenario this should honor the language standard of the installed toolchain, which most
+# of the time should be C++14 or newer anyway (C++14 was made default in Clang 6.0).
+# To disable this C++14 enforcement, you may specify whitespace for CXXLANGFLAGS in your shell:
+#   $ CXXLANGFLAGS=" "; make
+
+ifeq ($(CXXLANGFLAGS),)
+   CXXLANGFLAGS   := -std=c++14
+endif
+
 ifeq ($(ARCHFLAGS),)
 ifeq ($(archs),ppc)
    ARCHFLAGS = -arch ppc -arch ppc64
@@ -96,7 +106,7 @@ CC     += -miphoneos-version-min=5.0
 CXXFLAGS += -miphoneos-version-min=5.0
 endif
 else ifneq (,$(findstring qnx,$(platform)))
-	TARGET := $(TARGET_NAME)_libretro_qnx.so
+   TARGET := $(TARGET_NAME)_libretro_qnx.so
    fpic := -fPIC
    SHARED := -shared -Wl,--version-script=$(CORE_DIR)/link.T -Wl,--no-undefined
 else ifeq ($(platform), emscripten)
@@ -116,7 +126,7 @@ else ifeq ($(platform), vita)
    CC = arm-vita-eabi-gcc
    AR = arm-vita-eabi-ar
    CXXFLAGS += -Wl,-q -Wall -O3
-	STATIC_LINKING = 1
+   STATIC_LINKING = 1
 else
    CC = gcc
    TARGET := $(TARGET_NAME)_libretro.dll
@@ -137,8 +147,8 @@ include Makefile.common
 
 OBJECTS := $(SOURCES_C:.c=.o) $(SOURCES_CXX:.cpp=.o)
 
-CFLAGS   += -Wall -D__LIBRETRO__ $(fpic) $(INCFLAGS) 
-CXXFLAGS += -Wall -D__LIBRETRO__ $(fpic) $(INCFLAGS)
+CFLAGS   += -Wall -D__LIBRETRO__ $(fpic) $(INCFLAGS)
+CXXFLAGS += -Wall -D__LIBRETRO__ $(fpic) $(INCFLAGS) $(CXXLANGFLAGS)
 
 all: $(TARGET)
 
